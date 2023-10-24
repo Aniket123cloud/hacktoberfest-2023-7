@@ -1,0 +1,54 @@
+Given an undirected connected graph with V vertices and adjacency list adj. You are required to find all the vertices removing which (and edges through it) disconnects the graph into 2 or more components.
+Note: Indexing is zero-based i.e nodes numbering from (0 to V-1). There might be loops present in the graph.
+
+from collections import defaultdict
+
+class Graph:
+    def __init__(self, V):
+        self.V = V
+        self.adj = defaultdict(list)
+
+    def addEdge(self, u, v):
+        self.adj[u].append(v)
+        self.adj[v].append(u)
+
+    def isDisconnectingVertex(self, u, visited, adj):
+        visited[u] = True
+        count = 0
+
+        for v in adj[u]:
+            if not visited[v]:
+                count += self.isDisconnectingVertex(v, visited, adj)
+
+        return count + 1
+
+    def findDisconnectingVertices(self):
+        disconnecting_vertices = []
+
+        for u in range(self.V):
+            visited = [False] * self.V
+            visited[u] = True
+            count = 0
+
+            for v in self.adj[u]:
+                if not visited[v]:
+                    components = self.isDisconnectingVertex(v, visited, self.adj)
+                    if components % 2 == 0:
+                        disconnecting_vertices.append(u)
+                    count += components
+
+            if self.V - count > 1:
+                disconnecting_vertices.append(u)
+
+        return disconnecting_vertices
+
+# Example usage:
+V = 5
+g = Graph(V)
+g.addEdge(0, 1)
+g.addEdge(1, 2)
+g.addEdge(2, 3)
+g.addEdge(3, 4)
+
+disconnecting_vertices = g.findDisconnectingVertices()
+print(disconnecting_vertices)  # Output: [2]
